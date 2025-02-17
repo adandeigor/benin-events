@@ -1,24 +1,133 @@
 @import "tailwindcss";
 
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
 @theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --font-playfair: var(--font-playfairDispay);
+    --font-montserrat: var(--font-montserrat);
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --background: hsl(271 60% 99%);
+    --foreground: hsl(271 66% 4%);
+    --muted: hsl(271 34% 94%);
+    --muted-foreground: hsl(271 2% 30%);
+    --popover: hsl(271 60% 99%);
+    --popover-foreground: hsl(271 66% 4%);
+    --card: hsl(271 60% 99%);
+    --card-foreground: hsl(271 66% 4%);
+    --border: hsl(271 13% 94%);
+    --input: hsl(271 13% 94%);
+    --primary: hsl(24.58 94.98% 53.14%);
+    --primary-foreground: hsl(271 0% 100%);
+    --secondary: hsl(39.2 92.59% 52.35%);
+    --secondary-foreground: hsl(271 0% 100%);
+    --accent: hsl(271 3% 85%);
+    --accent-foreground: hsl(271 3% 25%);
+    --destructive: hsl(17 80% 26%);
+    --destructive-foreground: hsl(17 80% 86%);
+    --ring: hsl(271 17% 29%);
+    --chart-1: hsl(271 17% 29%);
+    --chart-2: hsl(271 3% 85%);
+    --chart-3: hsl(271 3% 85%);
+    --chart-4: hsl(271 3% 88%);
+    --chart-5: hsl(271 20% 29%);
+    --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+    --background: hsl(271 31% 3%);
+    --foreground: hsl(271 19% 97%);
+    --muted: hsl(271 34% 6%);
+    --muted-foreground: hsl(271 2% 70%);
+    --popover: hsl(271 31% 3%);
+    --popover-foreground: hsl(271 19% 97%);
+    --card: hsl(271 31% 3%);
+    --card-foreground: hsl(271 19% 97%);
+    --border: hsl(271 13% 15%);
+    --input: hsl(271 13% 15%);
+    --primary: hsl(271 17% 29%);
+    --primary-foreground: hsl(271 17% 89%);
+    --secondary: hsl(271 2% 15%);
+    --secondary-foreground: hsl(271 2% 75%);
+    --accent: hsl(271 2% 15%);
+    --accent-foreground: hsl(271 2% 75%);
+    --destructive: hsl(17 80% 46%);
+    --destructive-foreground: hsl(0 0% 100%);
+    --ring: hsl(271 17% 29%);
+    --chart-1: hsl(271 17% 29%);
+    --chart-2: hsl(271 2% 15%);
+    --chart-3: hsl(271 2% 15%);
+    --chart-4: hsl(271 2% 18%);
+    --chart-5: hsl(271 20% 29%);
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --animate-accordion-down: accordion-down 0.2s ease-out;
+    --animate-accordion-up: accordion-up 0.2s ease-out;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+
+    @keyframes accordion-down {
+        from {
+            height: 0;
+        }
+        to {
+            height: var(--radix-accordion-content-height);
+        }
+    }
+
+    @keyframes accordion-up {
+        from {
+            height: var(--radix-accordion-content-height);
+        }
+        to {
+            height: 0;
+        }
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
 }
