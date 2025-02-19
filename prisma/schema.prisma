@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Rule{
+  rule_id Int @id @default(autoincrement())
+  rule_name String
+  rule_description String
+  users User[]
+  rule_created_at DateTime @default(now())
+  rule_updated_at DateTime @default(now())
+}
+
+model User{
+  user_id Int @id @default(autoincrement())
+  name String 
+  email String @unique @db.VarChar(255)  // Ajouter une limite de caractères
+  role_id Int
+  role Rule @relation(fields: [role_id], references: [rule_id])
+  password String
+  events Events[]
+  tickets Tickets[]
+  transactions Transactions[]
+  phone_number String @db.VarChar(20)    // Limiter la taille
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+} 
+
+model Categories{
+  category_id Int @id @default(autoincrement())
+  category_name String
+  category_description String
+  events Events[]
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+model Events {
+  event_id Int @id @default(autoincrement())
+  title String
+  description String
+  start_date DateTime
+  end_date DateTime
+  images String[]
+  organizer_id Int
+  organizer User @relation(fields: [organizer_id], references: [user_id])
+  category_id Int
+  category Categories @relation(fields: [category_id], references: [category_id])
+  ticket_price Float
+  vedette Boolean
+  tickets Tickets[]
+  marketing_campaigns Marketing_Campaigns[]
+  visibility EventVisibility // Changer String en EventVisibility
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+model Tickets{
+  ticket_id Int @id @default(autoincrement())
+  event_id Int
+  event Events @relation(fields: [event_id], references: [event_id])
+  user_id Int
+  user User @relation(fields: [user_id], references: [user_id])
+  payment Payments[]
+  status TicketStatus // Changer String en TicketStatus
+  qr_code String
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+model Marketing_Campaigns{
+  campaign_id Int @id @default(autoincrement())
+  event_id Int
+  event Events @relation(fields: [event_id], references: [event_id])
+  start_date DateTime
+  end_date DateTime
+  type String
+  status String
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+model Transactions{
+  transaction_id Int @id @default(autoincrement())
+  user_id Int
+  user User @relation(fields: [user_id], references: [user_id])
+  amount Float
+  payment_method String
+  status PaymentStatus // Changer String en PaymentStatus
+  payment Payments[]
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+}
+
+model Payments {
+  payment_id Int @id @default(autoincrement())
+  ticket_id Int
+  ticket Tickets @relation(fields: [ticket_id], references: [ticket_id])
+  transaction_id Int
+  transaction Transactions @relation(fields: [transaction_id], references: [transaction_id])
+  amount Float
+  payment_status PaymentStatus // Changer String en PaymentStatus
+  payment_method String
+  created_at DateTime @default(now())
+}
+
+model Guide{
+  guide_id Int @id @default(autoincrement())
+  title String
+  description String
+  file_url String
+  created_at DateTime @default(now())
+}
+
+model Faqs{
+  faq_id Int @id @default(autoincrement())
+  question String
+  answer String
+  created_at DateTime @default(now())
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum TicketStatus {
+  ACTIVE
+  USED
+  CANCELLED
+  EXPIRED
+}
+
+enum EventVisibility {
+  PUBLIC
+  PRIVATE
+  DRAFT
+}
