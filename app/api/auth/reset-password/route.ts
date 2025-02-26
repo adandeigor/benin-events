@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     from: process.env.EMAIL_SEND,
     to: email,
     subject: 'Réinitialisation de mot de passe',
-    text: `Cliquez sur le lien suivant pour réinitialiser votre mot de passe : ${process.env.FRONTEND_URL}/reset-password?token=${token}`
+    text: `Cliquez sur le lien suivant pour réinitialiser votre mot de passe : ${process.env.FRONTEND_URL}/reset-password/?token=${token}`
   };
 
   await transporter.sendMail(mailOptions);

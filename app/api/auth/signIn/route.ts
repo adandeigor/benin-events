@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       where: { email: parsedData.email },
     });
 
-    if (!user || !bcrypt.compareSync(parsedData.password, user.password)) {
+    if (!user || !bcrypt.compareSync(parsedData.password, user.password as string)) {
       return new Response(
         JSON.stringify({ error: "Identifiants invalides" }),
         { status: 401, headers: { "Content-Type": "application/json" } }

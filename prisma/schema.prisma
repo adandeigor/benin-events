@@ -9,32 +9,32 @@ datasource db {
 }
 
 model Rule {
-  rule_id          Int    @id @default(autoincrement())
+  rule_id          Int      @id @default(autoincrement())
   rule_name        String
   rule_description String
-  users            User[]
   rule_created_at  DateTime @default(now())
   rule_updated_at  DateTime @default(now())
+  users            User[]
 }
 
 model User {
-  user_id         Int              @id @default(autoincrement())
-  name            String?
-  email           String           @unique @db.VarChar(255)
-  emailVerified   DateTime?
-  image           String?
-  password        String
-  role_id         Int
-  role            Rule             @relation(fields: [role_id], references: [rule_id])
-  phone_number    String           @db.VarChar(20)
-  events          Events[]
-  tickets         Tickets[]
-  transactions    Transactions[]
-  accounts        Account[]
-  sessions        Session[]
-  authenticators  Authenticator[]
-  created_at      DateTime          @default(now())
-  updated_at      DateTime          @updatedAt
+  user_id        Int             @id @default(autoincrement())
+  name           String?
+  email          String          @unique @db.VarChar(255)
+  emailVerified  DateTime?
+  image          String?
+  password       String?
+  role_id        Int            @default(1)
+  phone_number   String?          @db.VarChar(20)
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  accounts       Account[]
+  authenticators Authenticator[]
+  events         Events[]
+  sessions       Session[]
+  tickets        Tickets[]
+  transactions   Transactions[]
+  role           Rule            @relation(fields: [role_id], references: [rule_id])
 }
 
 model Account {
@@ -49,9 +49,10 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  created_at        DateTime        @default(now())
-  updated_at        DateTime        @updatedAt
-  user              User            @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+
   @@id([provider, providerAccountId])
 }
 
@@ -59,15 +60,16 @@ model Session {
   sessionToken String   @unique
   userId       Int
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
 }
 
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
+
   @@id([identifier, token])
 }
 
@@ -81,6 +83,7 @@ model Authenticator {
   credentialBackedUp   Boolean
   transports           String?
   user                 User    @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+
   @@id([userId, credentialID])
 }
 
@@ -88,97 +91,95 @@ model Categories {
   category_id          Int      @id @default(autoincrement())
   category_name        String
   category_description String
-  events               Events[]
   created_at           DateTime @default(now())
   updated_at           DateTime @default(now())
+  events               Events[]
 }
 
 model Events {
-  event_id            Int                  @id @default(autoincrement())
+  event_id            Int                   @id @default(autoincrement())
   title               String
   description         String
   start_date          DateTime
   end_date            DateTime
-  start_hours         DateTime
+  images              String[]
+  organizer_id        Int
+  category_id         Int
+  ticket_price        Float
+  vedette             Boolean
+  visibility          EventVisibility
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @default(now())
+  priority            Boolean
   Lieu                String
   banner_image        String
   entrer              String
-  images              String[]
-  priority            Boolean
-  organizer_id        Int
-  organizer           User                 @relation(fields: [organizer_id], references: [user_id])
-  category_id         Int
-  category            Categories           @relation(fields: [category_id], references: [category_id])
-  ticket_price        Float
-  vedette             Boolean
-  tickets             Tickets[]
+  start_hours         DateTime
+  category            Categories            @relation(fields: [category_id], references: [category_id])
+  organizer           User                  @relation(fields: [organizer_id], references: [user_id])
   marketing_campaigns Marketing_Campaigns[]
-  visibility          EventVisibility
-  created_at          DateTime             @default(now())
-  updated_at          DateTime             @default(now())
+  tickets             Tickets[]
 }
 
 model Tickets {
-  ticket_id    Int           @id @default(autoincrement())
-  event_id     Int
-  event        Events        @relation(fields: [event_id], references: [event_id])
-  user_id      Int
-  user         User          @relation(fields: [user_id], references: [user_id])
-  payment      Payments[]
-
-  price        Float         // Prix du ticket
-  ticket_type  String        // Type de ticket (VIP, Standard, etc.)
-  status       TicketStatus  // Statut du ticket (Valide, Utilisé, Annulé)
-
-  qr_code      String        @unique  // QR code unique du ticket
-  token        String        @unique  // Token sécurisé pour éviter la fraude
-  is_used      Boolean       @default(false) // Vérifie si le ticket a déjà été scanné
-  ticket_entrie Ticket_Entries[]
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
+  ticket_id     Int             @id @default(autoincrement())
+  event_id      Int
+  user_id       Int
+  status        TicketStatus
+  qr_code       String          @unique
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+  is_used       Boolean         @default(false)
+  price         Float
+  ticket_type   String
+  token         String          @unique
+  payment       Payments[]
+  ticket_entrie Ticket_Entries?
+  event         Events          @relation(fields: [event_id], references: [event_id])
+  user          User            @relation(fields: [user_id], references: [user_id])
 }
 
 model Ticket_Entries {
-  entry_id   Int     @id @default(autoincrement())
-  ticket_id  Int     @unique // Empêche plusieurs entrées avec le même ticket
+  entry_id   Int      @id @default(autoincrement())
+  ticket_id  Int      @unique
   scanned_at DateTime @default(now())
-  ticket     Tickets @relation(fields: [ticket_id], references: [ticket_id])
+  ticket     Tickets  @relation(fields: [ticket_id], references: [ticket_id])
 }
 
 model Marketing_Campaigns {
-  campaign_id  Int           @id @default(autoincrement())
-  event_id     Int
-  event        Events        @relation(fields: [event_id], references: [event_id])
-  start_date   DateTime
-  end_date     DateTime
-  type         String
-  status       String
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @default(now())
+  campaign_id Int      @id @default(autoincrement())
+  event_id    Int
+  start_date  DateTime
+  end_date    DateTime
+  type        String
+  status      String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  event       Events   @relation(fields: [event_id], references: [event_id])
 }
 
 model Transactions {
-  transaction_id  Int           @id @default(autoincrement())
-  user_id         Int
-  user            User          @relation(fields: [user_id], references: [user_id])
-  amount          Float
-  payment_method  String
-  status          PaymentStatus
-  payment         Payments[]
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @default(now())
+  transaction_id Int           @id @default(autoincrement())
+  user_id        Int
+  amount         Float
+  payment_method String
+  status         PaymentStatus
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @default(now())
+  payment        Payments[]
+  user           User          @relation(fields: [user_id], references: [user_id])
 }
 
 model Payments {
-  payment_id      Int           @id @default(autoincrement())
-  ticket_id       Int
-  ticket          Tickets       @relation(fields: [ticket_id], references: [ticket_id])
-  transaction_id  Int
-  transaction     Transactions  @relation(fields: [transaction_id], references: [transaction_id])
-  amount          Float
-  payment_status  PaymentStatus
-  payment_method  String
-  created_at      DateTime      @default(now())
+  payment_id     Int           @id @default(autoincrement())
+  ticket_id      Int
+  transaction_id Int
+  amount         Float
+  payment_status PaymentStatus
+  payment_method String
+  created_at     DateTime      @default(now())
+  ticket         Tickets       @relation(fields: [ticket_id], references: [ticket_id])
+  transaction    Transactions  @relation(fields: [transaction_id], references: [transaction_id])
 }
 
 model Guide {
@@ -190,10 +191,10 @@ model Guide {
 }
 
 model Faqs {
-  faq_id      Int      @id @default(autoincrement())
-  question    String
-  answer      String
-  created_at  DateTime @default(now())
+  faq_id     Int      @id @default(autoincrement())
+  question   String
+  answer     String
+  created_at DateTime @default(now())
 }
 
 enum PaymentStatus {

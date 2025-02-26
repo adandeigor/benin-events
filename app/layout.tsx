@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { SessionProvider } from "next-auth/react";
 
 const playfairDisplay = Playfair_Display({
     variable: "--font-playfair-display",
@@ -25,17 +26,14 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
+            
             <body
                 className={`${playfairDisplay.variable} ${montserrat.variable} antialiased font-montserrat`}
             >
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
-                >
-                    {children}
-                </ThemeProvider>
+                
+                
+                {children}
+                
             </body>
         </html>
     );
