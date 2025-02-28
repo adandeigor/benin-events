@@ -14,7 +14,7 @@ model Rule {
   rule_description String
   users            User[]
   rule_created_at  DateTime @default(now())
-  rule_updated_at  DateTime @default(now())
+  rule_updated_at  DateTime @updatedAt
 }
 
 model User {
@@ -25,7 +25,7 @@ model User {
   image           String?
   password        String
   role_id         Int
-  role            Rule             @relation(fields: [role_id], references: [rule_id])
+  role            Rule             @relation(fields: [role_id], references: [rule_id], onDelete: Cascade)
   phone_number    String           @db.VarChar(20)
   events          Events[]
   tickets         Tickets[]
@@ -90,91 +90,90 @@ model Categories {
   category_description String
   events               Events[]
   created_at           DateTime @default(now())
-  updated_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
 }
 
 model Events {
   event_id            Int                  @id @default(autoincrement())
   title               String
+  slug                String               @unique
   description         String
   start_date          DateTime
   end_date            DateTime
   start_hours         DateTime
-  Lieu                String
+  location            String
   banner_image        String
-  entrer              String
+  entry_fee           String
   images              String[]
   priority            Boolean
   organizer_id        Int
-  organizer           User                 @relation(fields: [organizer_id], references: [user_id])
+  organizer           User                 @relation(fields: [organizer_id], references: [user_id], onDelete: Cascade)
   category_id         Int
-  category            Categories           @relation(fields: [category_id], references: [category_id])
+  category            Categories           @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
   ticket_price        Float
   vedette             Boolean
   tickets             Tickets[]
   marketing_campaigns Marketing_Campaigns[]
   visibility          EventVisibility
   created_at          DateTime             @default(now())
-  updated_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
 }
 
 model Tickets {
   ticket_id    Int           @id @default(autoincrement())
   event_id     Int
-  event        Events        @relation(fields: [event_id], references: [event_id])
+  event        Events        @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
   user_id      Int
-  user         User          @relation(fields: [user_id], references: [user_id])
+  user         User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   payment      Payments[]
-
-  price        Float         // Prix du ticket
-  ticket_type  String        // Type de ticket (VIP, Standard, etc.)
-  status       TicketStatus  // Statut du ticket (Valide, Utilisé, Annulé)
-
-  qr_code      String        @unique  // QR code unique du ticket
-  token        String        @unique  // Token sécurisé pour éviter la fraude
-  is_used      Boolean       @default(false) // Vérifie si le ticket a déjà été scanné
-  ticket_entrie Ticket_Entries[]
+  price        Float         
+  ticket_type  String        
+  status       TicketStatus  
+  qr_code      String        @unique  
+  token        String        @unique  
+  is_used      Boolean       @default(false) 
+  ticket_entries Ticket_Entries[]
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
 }
 
 model Ticket_Entries {
   entry_id   Int     @id @default(autoincrement())
-  ticket_id  Int     @unique // Empêche plusieurs entrées avec le même ticket
+  ticket_id  Int     @unique 
   scanned_at DateTime @default(now())
-  ticket     Tickets @relation(fields: [ticket_id], references: [ticket_id])
+  ticket     Tickets @relation(fields: [ticket_id], references: [ticket_id], onDelete: Cascade)
 }
 
 model Marketing_Campaigns {
   campaign_id  Int           @id @default(autoincrement())
   event_id     Int
-  event        Events        @relation(fields: [event_id], references: [event_id])
+  event        Events        @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
   start_date   DateTime
   end_date     DateTime
   type         String
   status       String
   created_at   DateTime      @default(now())
-  updated_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model Transactions {
   transaction_id  Int           @id @default(autoincrement())
   user_id         Int
-  user            User          @relation(fields: [user_id], references: [user_id])
+  user            User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   amount          Float
   payment_method  String
   status          PaymentStatus
   payment         Payments[]
   created_at      DateTime      @default(now())
-  updated_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
 }
 
 model Payments {
   payment_id      Int           @id @default(autoincrement())
   ticket_id       Int
-  ticket          Tickets       @relation(fields: [ticket_id], references: [ticket_id])
+  ticket          Tickets       @relation(fields: [ticket_id], references: [ticket_id], onDelete: Cascade)
   transaction_id  Int
-  transaction     Transactions  @relation(fields: [transaction_id], references: [transaction_id])
+  transaction     Transactions  @relation(fields: [transaction_id], references: [transaction_id], onDelete: Cascade)
   amount          Float
   payment_status  PaymentStatus
   payment_method  String

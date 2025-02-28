@@ -31,7 +31,7 @@ export function SearchEvent() {
     React.useEffect(() => {
         async function fetchEvents() {
             try {
-                const response = await fetch("/api/events");
+                const response = await fetch("/api/events/gets");
                 if (!response.ok)
                     throw new Error("Erreur lors du chargement des événements");
 
