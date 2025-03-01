@@ -12,10 +12,10 @@ export default function MagicLinkEmail({ link }: MagicLinkEmailProps) {
         <Tailwind>
           <Container className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
             <Heading className="text-xl font-bold text-center text-blue-600">
-              Connexion à votre compte
+              Connexion à Benin Event's
             </Heading>
             <Text className="text-sm text-gray-700 text-center">
-              Cliquez sur le bouton ci-dessous pour vous connecter à Benin Event's. Ce lien expirera dans quelques minutes.
+              Cliquez sur le bouton ci-dessous pour vous connecter à Benin Event's. Ce lien expirera dans 30 minutes.
             </Text>
             <div className="text-center mt-4">
               <Button

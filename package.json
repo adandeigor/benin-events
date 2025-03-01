@@ -71,7 +71,9 @@
     "supabase": "^2.12.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.1.0",
     "uuid-v4": "^0.1.0",
+    "uuidv4": "^6.2.13",
     "vaul": "^1.1.2",
     "zod": "^3.24.2"
   },
