@@ -13,28 +13,27 @@ model Rule {
   rule_name        String
   rule_description String
   rule_created_at  DateTime @default(now())
-  rule_updated_at  DateTime @default(now())
-  users            User[]
+  rule_updated_at  DateTime @updatedAt
 }
 
 model User {
-  user_id        Int             @id @default(autoincrement())
-  name           String?
-  email          String          @unique @db.VarChar(255)
-  emailVerified  DateTime?
-  image          String?
-  password       String?
-  role_id        Int            @default(1)
-  phone_number   String?          @db.VarChar(20)
-  created_at     DateTime        @default(now())
-  updated_at     DateTime        @updatedAt
-  accounts       Account[]
-  authenticators Authenticator[]
-  events         Events[]
-  sessions       Session[]
-  tickets        Tickets[]
-  transactions   Transactions[]
-  role           Rule            @relation(fields: [role_id], references: [rule_id])
+  user_id         Int              @id @default(autoincrement())
+  name            String?
+  email           String           @unique @db.VarChar(255)
+  emailVerified   DateTime?
+  image           String?
+  password        String
+  role_id         Int
+  role            Rule             @relation(fields: [role_id], references: [rule_id], onDelete: Cascade)
+  phone_number    String           @db.VarChar(20)
+  events          Events[]
+  tickets         Tickets[]
+  transactions    Transactions[]
+  accounts        Account[]
+  sessions        Session[]
+  authenticators  Authenticator[]
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
 }
 
 model Account {
@@ -90,22 +89,91 @@ model Categories {
   category_name        String
   category_description String
   created_at           DateTime @default(now())
-  updated_at           DateTime @default(now())
-  events               Events[]
+  updated_at           DateTime @updatedAt
 }
 
 model Events {
   event_id            Int                   @id @default(autoincrement())
   title               String
+  slug                String               @unique
   description         String
   start_date          DateTime
   end_date            DateTime
+  start_hours         DateTime
+  location            String
+  banner_image        String
+  entry_fee           String
   images              String[]
   organizer_id        Int
+  organizer           User                 @relation(fields: [organizer_id], references: [user_id], onDelete: Cascade)
   category_id         Int
+  category            Categories           @relation(fields: [category_id], references: [category_id], onDelete: Cascade)
   ticket_price        Float
   vedette             Boolean
   visibility          EventVisibility
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+}
+
+model Tickets {
+  ticket_id    Int           @id @default(autoincrement())
+  event_id     Int
+  event        Events        @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  user_id      Int
+  user         User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  payment      Payments[]
+  price        Float         
+  ticket_type  String        
+  status       TicketStatus  
+  qr_code      String        @unique  
+  token        String        @unique  
+  is_used      Boolean       @default(false) 
+  ticket_entries Ticket_Entries[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+}
+
+model Ticket_Entries {
+  entry_id   Int     @id @default(autoincrement())
+  ticket_id  Int     @unique 
+  scanned_at DateTime @default(now())
+  ticket     Tickets @relation(fields: [ticket_id], references: [ticket_id], onDelete: Cascade)
+}
+
+model Marketing_Campaigns {
+  campaign_id  Int           @id @default(autoincrement())
+  event_id     Int
+  event        Events        @relation(fields: [event_id], references: [event_id], onDelete: Cascade)
+  start_date   DateTime
+  end_date     DateTime
+  type         String
+  status       String
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+}
+
+model Transactions {
+  transaction_id  Int           @id @default(autoincrement())
+  user_id         Int
+  user            User          @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  amount          Float
+  payment_method  String
+  status          PaymentStatus
+  payment         Payments[]
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+}
+
+model Payments {
+  payment_id      Int           @id @default(autoincrement())
+  ticket_id       Int
+  ticket          Tickets       @relation(fields: [ticket_id], references: [ticket_id], onDelete: Cascade)
+  transaction_id  Int
+  transaction     Transactions  @relation(fields: [transaction_id], references: [transaction_id], onDelete: Cascade)
+  amount          Float
+  payment_status  PaymentStatus
+  payment_method  String
+  created_at      DateTime      @default(now())
   created_at          DateTime              @default(now())
   updated_at          DateTime              @default(now())
   priority            Boolean

@@ -13,7 +13,7 @@ CREATE TABLE "Rule" (
     "rule_name" TEXT NOT NULL,
     "rule_description" TEXT NOT NULL,
     "rule_created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "rule_updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "rule_updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Rule_pkey" PRIMARY KEY ("rule_id")
 );
@@ -91,7 +91,7 @@ CREATE TABLE "Categories" (
     "category_name" TEXT NOT NULL,
     "category_description" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Categories_pkey" PRIMARY KEY ("category_id")
 );
@@ -100,17 +100,23 @@ CREATE TABLE "Categories" (
 CREATE TABLE "Events" (
     "event_id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
+    "slug" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
+    "start_hours" TIMESTAMP(3) NOT NULL,
+    "location" TEXT NOT NULL,
+    "banner_image" TEXT NOT NULL,
+    "entry_fee" TEXT NOT NULL,
     "images" TEXT[],
+    "priority" BOOLEAN NOT NULL,
     "organizer_id" INTEGER NOT NULL,
     "category_id" INTEGER NOT NULL,
     "ticket_price" DOUBLE PRECISION NOT NULL,
     "vedette" BOOLEAN NOT NULL,
     "visibility" "EventVisibility" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Events_pkey" PRIMARY KEY ("event_id")
 );
@@ -120,12 +126,25 @@ CREATE TABLE "Tickets" (
     "ticket_id" SERIAL NOT NULL,
     "event_id" INTEGER NOT NULL,
     "user_id" INTEGER NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "ticket_type" TEXT NOT NULL,
     "status" "TicketStatus" NOT NULL,
     "qr_code" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "is_used" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Tickets_pkey" PRIMARY KEY ("ticket_id")
+);
+
+-- CreateTable
+CREATE TABLE "Ticket_Entries" (
+    "entry_id" SERIAL NOT NULL,
+    "ticket_id" INTEGER NOT NULL,
+    "scanned_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Ticket_Entries_pkey" PRIMARY KEY ("entry_id")
 );
 
 -- CreateTable
@@ -137,7 +156,7 @@ CREATE TABLE "Marketing_Campaigns" (
     "type" TEXT NOT NULL,
     "status" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Marketing_Campaigns_pkey" PRIMARY KEY ("campaign_id")
 );
@@ -150,7 +169,7 @@ CREATE TABLE "Transactions" (
     "payment_method" TEXT NOT NULL,
     "status" "PaymentStatus" NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Transactions_pkey" PRIMARY KEY ("transaction_id")
 );
@@ -198,8 +217,20 @@ CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 -- CreateIndex
 CREATE UNIQUE INDEX "Authenticator_credentialID_key" ON "Authenticator"("credentialID");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Events_slug_key" ON "Events"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Tickets_qr_code_key" ON "Tickets"("qr_code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Tickets_token_key" ON "Tickets"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Ticket_Entries_ticket_id_key" ON "Ticket_Entries"("ticket_id");
+
 -- AddForeignKey
-ALTER TABLE "User" ADD CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Rule"("rule_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "User" ADD CONSTRAINT "User_role_id_fkey" FOREIGN KEY ("role_id") REFERENCES "Rule"("rule_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -211,25 +242,28 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Authenticator" ADD CONSTRAINT "Authenticator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Events" ADD CONSTRAINT "Events_organizer_id_fkey" FOREIGN KEY ("organizer_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Events" ADD CONSTRAINT "Events_organizer_id_fkey" FOREIGN KEY ("organizer_id") REFERENCES "User"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Events" ADD CONSTRAINT "Events_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Categories"("category_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Events" ADD CONSTRAINT "Events_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "Categories"("category_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Tickets" ADD CONSTRAINT "Tickets_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "Events"("event_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Tickets" ADD CONSTRAINT "Tickets_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "Events"("event_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Tickets" ADD CONSTRAINT "Tickets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Tickets" ADD CONSTRAINT "Tickets_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Marketing_Campaigns" ADD CONSTRAINT "Marketing_Campaigns_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "Events"("event_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Ticket_Entries" ADD CONSTRAINT "Ticket_Entries_ticket_id_fkey" FOREIGN KEY ("ticket_id") REFERENCES "Tickets"("ticket_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Transactions" ADD CONSTRAINT "Transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Marketing_Campaigns" ADD CONSTRAINT "Marketing_Campaigns_event_id_fkey" FOREIGN KEY ("event_id") REFERENCES "Events"("event_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Payments" ADD CONSTRAINT "Payments_ticket_id_fkey" FOREIGN KEY ("ticket_id") REFERENCES "Tickets"("ticket_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Transactions" ADD CONSTRAINT "Transactions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("user_id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Payments" ADD CONSTRAINT "Payments_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "Transactions"("transaction_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_ticket_id_fkey" FOREIGN KEY ("ticket_id") REFERENCES "Tickets"("ticket_id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Payments" ADD CONSTRAINT "Payments_transaction_id_fkey" FOREIGN KEY ("transaction_id") REFERENCES "Transactions"("transaction_id") ON DELETE CASCADE ON UPDATE CASCADE;
